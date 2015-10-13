@@ -3,23 +3,36 @@ library(qualityTools)
 
 # create a vector of w exponential waiting times with lambda = lam
 
+set.seed(50)
+
 wait <- function(w,lam){
-  set.seed(50)
   a = NULL
   for(i in 1:w){
     a = c(a,rexp(1,rate = lam))
   }
   return(a)
 }
-w <- wait(2000,1)
-hist(w)
+w <- wait(10000,5)
+
+# Plot histogram of simulated w along with density.
+
+lambda=5
+scale <- length(w)/10
+x <- seq(min(w),max(w),0.1)
+y <- dexp(x,lambda)*scale
+qplot(w, binwidth = .1) + geom_line(aes(x,y,color='red'))
+
 qqPlot(w)
+mean(w)
+
+# mean(w) is 0.2 equal to 1/rate. It proves it's exponential distributed.
 
 
 # create a vector of exponential waiting times which total t <= Max with lambda = lam
 
+set.seed(50)
+
 wait.until <- function(Max,lam){
-  set.seed(50)
   time = 0
   a = NULL
   while(time < Max){
@@ -27,16 +40,17 @@ wait.until <- function(Max,lam){
     a = c(a,inter)
     time = time + inter
   }
-  return(a[1:(length(a)-1)])
+  return(c(a[1:(length(a)-1)],"time"=time-inter))
 }
 # seed test:
-wait.until(5,1)
-wait.until(6,1)
+wait.until(5,2)
+wait.until(6,2)
 
 
 # now simulate the number of events to show that the number of events divided by
 # exponential waiting times are Poisson distributed
 # Remove "set.seed" in function wait.until()
+
 wait.until <- function(Max,lam){
   time = 0
   a = NULL
@@ -49,6 +63,7 @@ wait.until <- function(Max,lam){
 }
 
 poi.test <- function(rep, Max, lam){
+  n=rep
   a = NULL
   for(i in 1:rep){
     q = wait.until(Max,lam)
@@ -56,12 +71,18 @@ poi.test <- function(rep, Max, lam){
   }
   return(a)
 }
-p <- poi.test(10000,6,1)
-hist(p)
+p <- poi.test(10000,20,1)
+
+# Plot histogram of simulated p along with its density.
+lambda=mean(p)
+scale <- length(p)
+x <- seq(min(p),max(p),1)
+y <- dpois(x,lambda)*scale
+qplot(p, binwidth = 1) + geom_line(aes(x,y,color='red'))
+
+# And since mean(p) = var(p), we can prove it is poisson distributed.
 var(p)
 mean(p)
-# From the histogram of p, we can see it's poisson distributed.
-# And since mean(p) = var(p), we can prove it is poisson distributed.
 
 
 # now simulate the waiting time for k events to occur with lambda = lam
@@ -104,13 +125,26 @@ gam.test <-function(rep, max.e, lam ){
   }
   return(a)
 }
-g <- gam.test(10000,6,3)
-hist(g)
+g <- gam.test(10000,5,4)
+
+#  Plot histogram of simulated g along with its density.
+
+scale <- length(g)/10
+
+lambda=mean(g)/var(g)
+shape=mean(g)^2/var(g)
+x <- seq(min(g),max(g),0.1)
+y <- dgamma(x,shape,rate=lambda)*scale
+qplot(g, binwidth = 0.1) + geom_line(aes(x,y,color='red'))
+
 mean(g)
 var(g)
 mean(g)/var(g)
 # First according to histogram, we can see g is gamma distributed.
-# then we calculate mean(g)/var(g) equal to lambda 3.
+# then we calculate mean(g)/var(g) equal to lambda.
 # So it proves g is gamma distributed.
-# In other words, in waiting time example, the number of events
-# is poisson distributed while total waiting time is gamma distributed.
+
+
+# In waiting time example, the waiting time divided by k events are expotential distributed,
+# the number of k events are poisson distributed,
+# and total waiting time are gamma distributed.
