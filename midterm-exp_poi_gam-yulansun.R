@@ -8,6 +8,16 @@ library(qualityTools)
 set.seed(50)
 
 wait <- function(w,lam){
+  
+  
+  
+  ## Jing Liu--there are some limitations for the parameters of these distributions
+  ## thus we can check the input to avoid invalid input--Jing Liu
+  if(w <= 0)stop("w should be positive")
+  if(lam <= 0)stop("lam should be positive")
+  
+  
+  
   a = NULL
   for(i in 1:w){
     a = c(a,rexp(1,rate = lam))
@@ -24,6 +34,12 @@ x <- seq(min(w),max(w),0.1)
 y <- dexp(x,lambda)*scale
 qplot(w, binwidth = .1) + geom_line(aes(x,y,color='red'))
 
+
+
+## Jing Liu--great plot!!!:)
+
+
+
 qqPlot(w)
 mean(w)
 
@@ -34,6 +50,15 @@ mean(w)
 # create a vector of exponential waiting times which total t <= Max with lambda = lam
 
 wait.until <- function(Max,lam){
+  
+  
+  
+  ## Jing Liu--input checking
+  if(Max <= 0)stop("Max should be positive")
+  if(lam <= 0)stop("lam should be positive")
+  
+  
+  
   set.seed(50)
   time = 0
   a = NULL
@@ -54,6 +79,15 @@ wait.until(6,2)
 # Remove "set.seed" in function wait.until()
 
 wait.until <- function(Max,lam){
+  
+  
+  
+  ## Jing Liu--input checking
+  if(Max <= 0)stop("Max should be positive")
+  if(lam <= 0)stop("lam should be positive")
+  
+  
+  
   time = 0
   a = NULL
   while(time < Max){
@@ -65,6 +99,16 @@ wait.until <- function(Max,lam){
 }
 
 poi.test <- function(rep, Max, lam){
+  
+  
+  
+  ## Jing Liu--input checking
+  ## because Max and lam are checked in the wait.until functon
+  ## thus we don't have to check again
+  if(rep <= 0)stop("rep should be positive")
+  
+  
+  
   n=rep
   a = NULL
   for(i in 1:rep){
@@ -89,6 +133,17 @@ qplot(p, binwidth = 1) + geom_line(aes(x,y,color='red'))
 var(p)
 mean(p)
 
+
+
+## Jing Liu--since the main idea is to explore the relationship 
+## between exponential distribution and poisson distribution
+## we can demonstrate the connection between the mean and variance of poisson distribution
+## and the parameter of exponential distribution
+## that is, mean(p)=var(p)=Max*lam, where Max measures the cumulative time
+## and lam is the parameter for exponential distribution that generated the time intervels
+
+
+
 # Another way to check if it is poisson distributed is using KS test.
 rp <- rpois(10000,lambda)
 ks.test(p,rp)
@@ -99,6 +154,15 @@ ks.test(p,rp)
 # The output include each waiting time and "time": total waiting time.
 
 wait.for <- function(k, lam){
+  
+  
+  
+  # Jing Liu--input checking
+  if(k <= 0) stop("k should be positive")
+  if(lam <= 0) stop("lam should be positive")
+  
+  
+  
   set.seed(50)
   time = 0
   count = 0
@@ -119,6 +183,15 @@ wait.for(6,2)
 # first redefine function wait.for(), remove set.seed()
 
 wait.for <- function(k, lam){
+  
+  
+  
+  # Jing Liu--input checking
+  if(k <= 0) stop("k should be positive")
+  if(lam <= 0) stop("lam should be positive")
+  
+  
+  
   time = 0
   count = 0
   a = NULL
@@ -131,6 +204,14 @@ wait.for <- function(k, lam){
 }
 
 gam.test <-function(rep, k, lam ){
+  
+  
+  
+  # Jing Liu--input checking
+  if(rep <= 0)stop("rep should be positive")
+  
+  
+  
   a=NULL
   for (i in 1:rep){
     t = wait.for(k,lam)
@@ -152,6 +233,18 @@ qplot(g, binwidth = 0.01) + geom_line(aes(x,y,color='red'))
 mean(g)
 var(g)
 mean(g)/var(g)
+
+
+
+## Jing Liu--relationship between exponential and gamma
+lambda <- mean(g)/var(g)
+alpha <- mean(g)^2/var(g)
+## for a gamma distribution with parameters of alpha and lambda
+## alpha is equal to the number of events occurred
+## and lambda is equal to the parameter of the exponential distribution
+## that generates the time intervals between events
+
+
 
 # Another way to check if it is gamma distributed is using KS test.
 rg <- rgamma(10000,mean(g)^2/var(g),mean(g)/var(g))
